@@ -43,3 +43,7 @@ if __name__ == "__main__":
     with open("digest.txt", "w", encoding="utf-8") as f:
         f.write(obj["digest"][:200])
     print("생성 완료:", kst)
+    with open("digest.txt", "w", encoding="utf-8") as f:
+        f.write(obj["digest"][:200])
+    with open("full.txt", "w", encoding="utf-8") as f:   # ← 추가
+        f.write(obj["full"])                              # ← 추가
