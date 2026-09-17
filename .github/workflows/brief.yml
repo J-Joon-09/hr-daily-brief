@@ -1,0 +1,36 @@
+name: HR Daily Brief
+on:
+  schedule:
+    - cron: "0 0 * * 1-5"      # UTC 00:00 = KST 09:00, 평일
+  workflow_dispatch:            # 수동 실행(테스트)
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - name: 브리핑 생성
+        run: python generate.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: public }
+      - id: deploy
+        uses: actions/deploy-pages@v4
+      - name: 카톡 발송
+        run: python send.py
+        env:
+          KAKAO_REST_API_KEY:  ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          FULL_PAGE_URL:       ${{ steps.deploy.outputs.page_url }}
